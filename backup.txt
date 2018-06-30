@@ -1,0 +1,110 @@
+switch (data.type) {
+		case 'buttons': {
+			switch (data.value) {
+				case 'settings': {
+					bot.sendMessage(id, `Что будем настраивать?`, keyboards.settings);
+				}break;
+				case 'schedule': {
+					bot.sendMessage(id, `На какой период?`, keyboards.schedule);
+				}break;
+			}
+		};break;
+		case 'settings': {
+			switch (data.value) {
+				case 'faculty': { 
+					let values = [];
+					for(let i = 0; i < Schedule.faculties.length; ++i) {
+						values.push(i);
+					}
+					bot.sendMessage(id, `Какой у тебя факультет?`, keyboards.makeKeyboard(Schedule.faculties, values, 'faculty'));
+				}break;
+				case 'course': {
+					bot.sendMessage(id, `На каком ты курсе?`, keyboards.makeKeyboard([1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6], 'course'));
+				}; break;
+				case 'group': {
+					let user = users[id];
+					if (!user.faculty) {
+						let values = [];
+						for(let i = 0; i < Schedule.faculties.length; ++i) {
+							values.push(i);
+						}
+						bot.sendMessage(id, `Для начала давай узнаем на каком ты факультете?`, keyboards.makeKeyboard(Schedule.faculties, values, 'faculty'));
+						return;
+					}
+					if (!user.course) {
+						bot.sendMessage(id, `А на каком ты курсе?`, keyboards.makeKeyboard([1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6], 'course'));
+						return;
+					}
+					let groups = Schedule.getGroups(user.faculty, user.course);
+					let keys = [];
+					let	values = [];
+					for(let i = 0; i < groups.length; ++i) {
+						keys.push(groups[i].number);
+						values.push(groups[i].groupOid);
+					}
+					bot.sendMessage(id, `В какой ты группе?`, keyboards.makeKeyboard(keys, values, 'group'));
+				} break;
+				case 'remind': {
+					bot.sendMessage(id, `Вы хотите включить напоминание следующей пары?`, keyboards.makeKeyboard(['Включить', 'Выключить'], [1, 0], 'remind'));
+				} break;
+				case 'buttons': {
+					bot.sendMessage(id, `Похоже с настройками покончено! Чем теперь займемся?`, keyboards.buttons);
+				} break;
+			}
+		};break;
+		case 'faculty': {
+			editUser(id, 'faculty', Schedule.faculties[data.value]);
+			bot.sendMessage(id, `Принято! Что дальше?`, keyboards.settings);
+		};break;
+		case 'course': {
+			editUser(id, 'course', data.value + 1);
+			bot.sendMessage(id, `Принято! Что дальше?`, keyboards.settings);
+		};break;
+		case 'group': {
+			editUser(id, 'group', data.value);
+			bot.sendMessage(id, `Принято! Что дальше?`, keyboards.settings);
+		};break;
+		case 'schedule': {
+			switch (data.value) {
+				case 'today': {
+					let pairs = Schedule.getPairsToday(users[id]);
+					let result = '';
+					for(let i = 0; i < pairs.subjects.length; ++i) {
+						let p = pairs.subjects[i];
+						result += `${p.time}\n${p.subject}\n${p.lecturer}\n${p.room}\n\n` ;
+					}
+					let string = `Сегодня ${pairs.date}:\n\n${result}`;
+					bot.sendMessage(id, string, keyboards.buttons);
+				}break;
+				case 'tomorrow': {
+					let pairs = Schedule.getPairsTomorrow(users[id]);
+					let result = '';
+					for(let i = 0; i < pairs.subjects.length; ++i) {
+						let p = pairs.subjects[i];
+						result += `${p.time}\n${p.subject}\n${p.lecturer}\n${p.room}\n\n` ;
+					}
+					let string = `Завтра ${pairs.date}:\n\n${result}`;
+					bot.sendMessage(id, string, keyboards.buttons);
+				}break;
+				case 'week': break;
+				case 'date': {
+					let today = moment().subtract(20, 'days').format('DD.MM.YYYY')
+					let tomorrow = moment().subtract(19, 'days').format('DD.MM.YYYY');
+					console.log('ok');
+					let pairs = Schedule.getSchedule(users[id], today, tomorrow)[0];
+					console.log(pairs);
+					let result = '';
+					for(let i = 0; i < pairs.subjects.length; ++i) {
+						let p = pairs.subjects[i];
+						result += `${p.time}\n${p.subject}\n${p.lecturer}\n${p.room}\n\n` ;
+					}
+					let string = `Завтра ${pairs.date}:\n\n${result}`;
+					bot.sendMessage(id, string, keyboards.buttons);
+				}break;
+			}
+		};break;
+		case 'remind': {
+			editUser(id, 'remind', data.value);
+			bot.sendMessage(id, data.value ? 'Напоминание включено' : 'Напоминание выключено', keyboards.buttons);
+		};break;
+	}

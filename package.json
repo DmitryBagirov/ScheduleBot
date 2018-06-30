@@ -1,0 +1,21 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "parseShedule.js",
+  "scripts": {
+    "start": "node parseShedule.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "csvtojson": "^2.0.3",
+    "moment": "^2.22.1",
+    "needle": "^2.2.1",
+    "node-telegram-bot-api": "^0.30.0",
+    "sync": "^0.2.5",
+    "sync-request": "^6.0.0"
+  }
+}
