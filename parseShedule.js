@@ -11,7 +11,7 @@ const Context = require('./src/context');
 //process.env.http_proxy=""
 //process.env.https_proxy="https://[anonymouse]:[]y5zqo9oz.cpt.vs-net-2.us"
 
-let token = '433527533:AAFV198fxQbN7sp7n3l46jead4-Um0hcY5Y';
+let token = '';
 
 
 let bot = new TelegramBot(token, {
